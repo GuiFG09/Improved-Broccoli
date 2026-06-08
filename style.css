@@ -1,0 +1,181 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 550px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+/* Seção do Formulário de Cadastro */
+.cadastro-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #3b82f6;
+}
+
+.btn-cadastrar {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-cadastrar:hover {
+    background-color: #1d4ed8;
+}
+
+/* Área de Exibição das Tarefas */
+.lista-titulo {
+    font-size: 16px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+#lista-tarefas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Card de cada tarefa individual */
+.tarefa-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    border: 1px solid #e2e8f0;
+    border-left-width: 6px;
+}
+
+/* Cores das bordas por prioridade */
+.tarefa-card.alta { border-left-color: #ef4444; }
+.tarefa-card.media { border-left-color: #f59e0b; }
+.tarefa-card.baixa { border-left-color: #10b981; }
+
+/* Estilos visuais de status */
+.tarefa-card.concluida .tarefa-titulo {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+.tarefa-card.cancelada {
+    opacity: 0.6;
+    background-color: #f1f5f9;
+}
+.tarefa-card.cancelada .tarefa-titulo {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.tarefa-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tarefa-titulo {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.tarefa-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.tarefa-tag select {
+    width: auto;
+    padding: 2px 5px;
+    font-size: 12px;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+/* Botões de Ação do seu escopo */
+.tarefa-acoes {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-acao {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-acao:hover {
+    opacity: 0.8;
+}
+
+.btn-concluir { background-color: #d1fae5; color: #065f46; }
+.btn-cancelar { background-color: #fee2e2; color: #991b1b; }

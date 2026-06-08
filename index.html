@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Web - Dev Escopo A</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Improved Broccoli</h1>
+
+        <div class="cadastro-container">
+            <div class="input-group">
+                <label for="input-titulo">O que precisa ser feito?</label>
+                <input type="text" id="input-titulo" placeholder="Ex: Estudar banco de dados...">
+            </div>
+            
+            <div class="input-group">
+                <label for="select-prioridade">Prioridade inicial</label>
+                <select id="select-prioridade">
+                    <option value="baixa">Baixa</option>
+                    <option value="media" selected>Média</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </div>
+
+            <button class="btn-cadastrar" id="btn-adicionar">Adicionar Tarefa</button>
+        </div>
+
+        <div class="lista-titulo">Tarefas</div>
+        <div id="lista-tarefas-container">
+            </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
