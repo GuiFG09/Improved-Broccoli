@@ -1,0 +1,17 @@
+{
+  "name": "improved-broccoli",
+  "version": "1.0.0",
+  "description": "Aplicação de To-Do com prioridades e temas",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": ["todo", "task", "management"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
