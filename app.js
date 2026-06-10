@@ -1,5 +1,9 @@
-// --- LÓGICA DE DADOS (APENAS O TEU ESCOPO) ---
+// --- LÓGICA DE DADOS ---
 let listaDeTarefas = [];
+
+// Estado da UI
+let filtroAtivo = "todas";
+let termoBusca = "";
 
 /**
  * RF01: Cadastro de Nova Tarefa
@@ -8,14 +12,14 @@ function cadastrarTarefa(titulo, prioridade = "media") {
     if (!titulo || titulo.trim() === "") return;
 
     const novaTarefa = {
-        id: Date.now(), // ID único baseado em timestamp
+        id: Date.now(),
         titulo: titulo.trim(),
         prioridade: prioridade,
         status: "pendente"
     };
 
     listaDeTarefas.push(novaTarefa);
-    renderizarTarefas(); // Atualiza o ecrã
+    renderizarTarefas();
 }
 
 /**
@@ -51,47 +55,129 @@ function definirPrioridade(idTarefa, novaPrioridade) {
     }
 }
 
-// --- ESCUTA DE EVENTOS E MANIPULAÇÃO DO DOM ---
+// --- FILTRO E PESQUISA ---
+
+/**
+ * Retorna as tarefas filtradas pelo status ativo e pelo termo de busca.
+ */
+function getTarefasFiltradas() {
+    return listaDeTarefas.filter(tarefa => {
+        const passaFiltro = filtroAtivo === "todas" || tarefa.status === filtroAtivo;
+        const passaBusca = tarefa.titulo.toLowerCase().includes(termoBusca.toLowerCase());
+        return passaFiltro && passaBusca;
+    });
+}
+
+/**
+ * Atualiza os contadores de resumo no topo da lista.
+ */
+function atualizarContadores() {
+    document.getElementById('count-total').textContent = listaDeTarefas.length;
+    document.getElementById('count-pendente').textContent = listaDeTarefas.filter(t => t.status === 'pendente').length;
+    document.getElementById('count-concluida').textContent = listaDeTarefas.filter(t => t.status === 'concluida').length;
+    document.getElementById('count-cancelada').textContent = listaDeTarefas.filter(t => t.status === 'cancelada').length;
+}
+
+/**
+ * Destaca o termo de busca dentro do título da tarefa.
+ */
+function destacarBusca(titulo) {
+    if (!termoBusca) return titulo;
+    const regex = new RegExp(`(${termoBusca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return titulo.replace(regex, '<mark>$1</mark>');
+}
+
+// --- ESCUTA DE EVENTOS ---
+
 const btnAdicionar = document.getElementById('btn-adicionar');
 const inputTitulo = document.getElementById('input-titulo');
 const selectPrioridade = document.getElementById('select-prioridade');
 const containerLista = document.getElementById('lista-tarefas-container');
+const inputBusca = document.getElementById('input-busca');
+const btnLimparBusca = document.getElementById('btn-limpar-busca');
+const estadoVazio = document.getElementById('estado-vazio');
+const listaTituloLabel = document.getElementById('lista-titulo-label');
 
-// Evento de clique para cadastrar
+// Adicionar tarefa
 btnAdicionar.addEventListener('click', () => {
     cadastrarTarefa(inputTitulo.value, selectPrioridade.value);
-    inputTitulo.value = ""; // Limpa o input
-    selectPrioridade.value = "media"; // Reseta para o padrão
+    inputTitulo.value = "";
+    selectPrioridade.value = "media";
 });
 
-// Evento de tecla (Enter) focado no input
 inputTitulo.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        btnAdicionar.click();
-    }
+    if (e.key === 'Enter') btnAdicionar.click();
+});
+
+// Pesquisa em tempo real
+inputBusca.addEventListener('input', () => {
+    termoBusca = inputBusca.value;
+    btnLimparBusca.classList.toggle('visivel', termoBusca.length > 0);
+    renderizarTarefas();
+});
+
+btnLimparBusca.addEventListener('click', () => {
+    inputBusca.value = "";
+    termoBusca = "";
+    btnLimparBusca.classList.remove('visivel');
+    inputBusca.focus();
+    renderizarTarefas();
+});
+
+// Filtros por status
+document.querySelectorAll('.btn-filtro').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        filtroAtivo = btn.dataset.filtro;
+        renderizarTarefas();
+    });
 });
 
 /**
- * Função utilitária para renderizar as alterações na interface.
- * Nota para o outro Dev: Esta função lê o array global 'listaDeTarefas'
+ * Renderiza a lista de tarefas conforme filtro e busca ativos.
  */
 function renderizarTarefas() {
-    containerLista.innerHTML = ""; // Limpa os elementos visuais antigos
+    containerLista.innerHTML = "";
+    atualizarContadores();
 
-    listaDeTarefas.forEach(tarefa => {
+    const tarefasFiltradas = getTarefasFiltradas();
+
+    // Atualiza o título da lista com contexto
+    const labelsStatus = { todas: "Todas as Tarefas", pendente: "Pendentes", concluida: "Concluídas", cancelada: "Canceladas" };
+    listaTituloLabel.textContent = labelsStatus[filtroAtivo] || "Tarefas";
+
+    // Exibe estado vazio se não houver resultados
+    if (tarefasFiltradas.length === 0) {
+        estadoVazio.classList.remove('hidden');
+        if (listaDeTarefas.length === 0) {
+            estadoVazio.querySelector('.estado-vazio-texto').textContent = "Nenhuma tarefa ainda";
+            estadoVazio.querySelector('.estado-vazio-sub').textContent = "Adicione uma tarefa acima para começar";
+            estadoVazio.querySelector('.estado-vazio-icone').textContent = "✏️";
+        } else {
+            estadoVazio.querySelector('.estado-vazio-texto').textContent = "Nenhuma tarefa encontrada";
+            estadoVazio.querySelector('.estado-vazio-sub').textContent = "Tente ajustar o filtro ou a pesquisa";
+            estadoVazio.querySelector('.estado-vazio-icone').textContent = "🔍";
+        }
+        return;
+    }
+
+    estadoVazio.classList.add('hidden');
+
+    tarefasFiltradas.forEach(tarefa => {
         const card = document.createElement('div');
-        
-        // Adiciona as classes necessárias para o CSS aplicar as cores e estilos corretos
         card.classList.add('tarefa-card', tarefa.prioridade);
         if (tarefa.status !== 'pendente') {
             card.classList.add(tarefa.status);
         }
 
+        const tituloDestacado = destacarBusca(tarefa.titulo);
+
         card.innerHTML = `
             <div class="tarefa-info">
-                <span class="tarefa-titulo">${tarefa.titulo}</span>
+                <span class="tarefa-titulo">${tituloDestacado}</span>
                 <span class="tarefa-tag">
-                    Prioridade: 
+                    Prioridade:
                     <select onchange="definirPrioridade(${tarefa.id}, this.value)" ${tarefa.status !== 'pendente' ? 'disabled' : ''}>
                         <option value="baixa" ${tarefa.prioridade === 'baixa' ? 'selected' : ''}>Baixa</option>
                         <option value="media" ${tarefa.prioridade === 'media' ? 'selected' : ''}>Média</option>
@@ -103,9 +189,12 @@ function renderizarTarefas() {
                 ${tarefa.status === 'pendente' ? `
                     <button class="btn-acao btn-concluir" onclick="finalizarTarefa(${tarefa.id})">✔ Concluir</button>
                     <button class="btn-acao btn-cancelar" onclick="cancelarTarefa(${tarefa.id})">✖ Cancelar</button>
-                ` : `<span style="font-size: 12px; font-weight: bold; color: #94a3b8;">${tarefa.status.toUpperCase()}</span>`}
+                ` : `<span class="status-badge ${tarefa.status}">${tarefa.status === 'concluida' ? '✔ Concluída' : '✖ Cancelada'}</span>`}
             </div>
         `;
         containerLista.appendChild(card);
     });
 }
+
+// Render inicial
+renderizarTarefas();

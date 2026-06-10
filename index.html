@@ -1,24 +1,34 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do Web - Dev Escopo A</title>
+    <title>To-Do Web - Improved Broccoli</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Improved Broccoli</h1>
+
+        <div class="app-header">
+            <h1>Improved Broccoli</h1>
+            <label class="theme-toggle" title="Alternar modo noturno">
+                <span class="theme-toggle-label" id="theme-label">☀️ Claro</span>
+                <span class="toggle-switch">
+                    <input type="checkbox" id="theme-checkbox">
+                    <span class="toggle-track"></span>
+                </span>
+            </label>
+        </div>
 
         <div class="cadastro-container">
             <div class="input-group">
                 <label for="input-titulo">O que precisa ser feito?</label>
                 <input type="text" id="input-titulo" placeholder="Ex: Estudar banco de dados...">
             </div>
-            
-            <div class="input-group">
-                <label for="select-prioridade">Prioridade inicial</label>
+
+            <div class="input-group input-grupo-prioridade">
+                <label for="select-prioridade">Prioridade</label>
                 <select id="select-prioridade">
                     <option value="baixa">Baixa</option>
                     <option value="media" selected>Média</option>
@@ -26,14 +36,80 @@
                 </select>
             </div>
 
-            <button class="btn-cadastrar" id="btn-adicionar">Adicionar Tarefa</button>
+            <button class="btn-cadastrar" id="btn-adicionar">+ Adicionar</button>
         </div>
 
-        <div class="lista-titulo">Tarefas</div>
-        <div id="lista-tarefas-container">
+        <div class="busca-filtros-container">
+            <div class="busca-wrapper">
+                <span class="busca-icone">🔍</span>
+                <input type="text" id="input-busca" placeholder="Pesquisar tarefas...">
+                <button class="btn-limpar-busca" id="btn-limpar-busca" title="Limpar pesquisa">✕</button>
             </div>
+
+            <div class="filtros-wrapper">
+                <button class="btn-filtro ativo" data-filtro="todas">Todas</button>
+                <button class="btn-filtro" data-filtro="pendente">Pendentes</button>
+                <button class="btn-filtro" data-filtro="concluida">Concluídas</button>
+                <button class="btn-filtro" data-filtro="cancelada">Canceladas</button>
+            </div>
+        </div>
+
+        <div class="resumo-container">
+            <div class="resumo-item">
+                <span class="resumo-numero" id="count-total">0</span>
+                <span class="resumo-label">Total</span>
+            </div>
+            <div class="resumo-separador"></div>
+            <div class="resumo-item">
+                <span class="resumo-numero pendente" id="count-pendente">0</span>
+                <span class="resumo-label">Pendentes</span>
+            </div>
+            <div class="resumo-separador"></div>
+            <div class="resumo-item">
+                <span class="resumo-numero concluida" id="count-concluida">0</span>
+                <span class="resumo-label">Concluídas</span>
+            </div>
+            <div class="resumo-separador"></div>
+            <div class="resumo-item">
+                <span class="resumo-numero cancelada" id="count-cancelada">0</span>
+                <span class="resumo-label">Canceladas</span>
+            </div>
+        </div>
+
+        <div class="lista-titulo" id="lista-titulo-label">Todas as Tarefas</div>
+        <div id="lista-tarefas-container"></div>
+
+        <div id="estado-vazio" class="estado-vazio hidden">
+            <span class="estado-vazio-icone">📋</span>
+            <p class="estado-vazio-texto">Nenhuma tarefa encontrada</p>
+            <p class="estado-vazio-sub">Tente ajustar o filtro ou a pesquisa</p>
+        </div>
     </div>
 
     <script src="app.js"></script>
+    <script>
+        const themeCheckbox = document.getElementById('theme-checkbox');
+        const themeLabel = document.getElementById('theme-label');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            themeCheckbox.checked = true;
+            themeLabel.textContent = '🌙 Escuro';
+        }
+
+        themeCheckbox.addEventListener('change', () => {
+            if (themeCheckbox.checked) {
+                html.setAttribute('data-theme', 'dark');
+                themeLabel.textContent = '🌙 Escuro';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                themeLabel.textContent = '☀️ Claro';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
 </body>
 </html>
