@@ -9,7 +9,7 @@ Este documento descreve os testes unitários para a aplicação **Improved Brocc
 - **RF01**: Cadastro de Nova Tarefa
 - **RF02**: Finalizar uma Tarefa  
 - **RF03**: Definir/Alterar Prioridade
-- **RF04**: Cancelar Tarefa
+- **RF04**: Cancelar Tarefa  
 - **Filtros e Pesquisa**: Busca e filtros por status
 - **Contadores**: Resumo de tarefas por status
 - **Destaque de Busca**: Highlight do termo pesquisado
@@ -40,76 +40,52 @@ npm run test:watch
 npm run test:coverage
 ```
 
-## 📊 Estrutura dos Testes
+📊 Estrutura dos Testes
+1. RF01: Cadastro de Nova Tarefa (2 testes)
+✅ Criar tarefa com título e prioridade padrão
 
-### 1. RF01: Cadastro de Nova Tarefa (8 testes)
+✅ Rejeitar tarefa com título vazio ou só com espaços
 
-✅ Criar tarefa com título e prioridade padrão  
-✅ Criar tarefa com prioridade alta  
-✅ Criar tarefa com prioridade baixa  
-✅ Rejeitar tarefa com título vazio  
-✅ Rejeitar tarefa com apenas espaços  
-✅ Limpar espaços em branco do título  
-✅ Adicionar múltiplas tarefas  
-✅ Gerar IDs únicos para cada tarefa  
+2. RF02: Finalizar Tarefa (2 testes)
+✅ Marcar tarefa como concluída
 
-### 2. RF02: Finalizar Tarefa (3 testes)
+✅ Não finalizar tarefa que já foi cancelada
 
-✅ Marcar tarefa como concluída  
-✅ Não finalizar tarefa inexistente  
-✅ Não finalizar tarefa cancelada  
+3. RF04: Cancelar Tarefa (2 testes)
+✅ Cancelar tarefa pendente
 
-### 3. RF04: Cancelar Tarefa (3 testes)
+✅ Retornar false ao tentar cancelar tarefa inexistente
 
-✅ Cancelar tarefa pendente  
-✅ Não cancelar tarefa inexistente  
-✅ Cancelar tarefa concluída  
+4. RF03: Definir Prioridade (2 testes)
+✅ Alterar prioridade da tarefa com sucesso
 
-### 4. RF03: Definir Prioridade (3 testes)
+✅ Retornar false se tentar mudar prioridade de ID inexistente
 
-✅ Alterar prioridade de baixa para alta  
-✅ Alterar prioridade múltiplas vezes  
-✅ Não alterar prioridade de tarefa inexistente  
+5. Filtros e Pesquisa (2 testes)
+✅ Filtrar tarefas pelo status correto
 
-### 5. Filtros e Pesquisa (7 testes)
+✅ Buscar tarefas pelo termo digitado
 
-✅ Retornar todas as tarefas quando filtro é "todas"  
-✅ Filtrar tarefas por status pendente  
-✅ Filtrar tarefas por status concluído  
-✅ Buscar tarefas por termo  
-✅ Buscar case-insensitive  
-✅ Retornar vazio quando termo não corresponde  
-✅ Combinar filtro de status com busca  
+6. Atualizador de Contadores (2 testes)
+✅ Retornar tudo zerado se a lista começar vazia
 
-### 6. Atualizador de Contadores (6 testes)
+✅ Atualizar os contadores ao finalizar uma tarefa
 
-✅ Retornar 0 quando lista vazia  
-✅ Contar tarefas pendentes  
-✅ Contar tarefas concluídas  
-✅ Contar tarefas canceladas  
-✅ Contar tarefas em diferentes status  
+7. Destaque de Busca (2 testes)
+✅ Não mexer na string se o termo de busca estiver vazio
 
-### 7. Destaque de Busca (5 testes)
+✅ Colocar a tag mark em volta do termo encontrado
 
-✅ Não destacar quando busca está vazia  
-✅ Destacar o termo na string  
-✅ Destacar case-insensitive  
-✅ Destacar múltiplas ocorrências  
-✅ Tratar caracteres especiais  
+8. Testes de Integração e Sistema (5 testes)
+✅ Fluxo padrão: cadastrar, concluir e checar contadores
 
-### 8. Testes de Integração (3 testes)
+✅ Fluxo de lote: rodar várias operações seguidas na lista
 
-✅ Fluxo completo: criar → finalizar → contar  
-✅ Múltiplas operações em sequência  
-✅ Busca e filtro com múltiplas tarefas  
+✅ Busca dinâmica após alterações: validar filtros com a lista em andamento
 
-## 📈 Cobertura de Testes
+✅ Simulação de uso: criar 5 tarefas e alterar status variados
 
-- **Total de Testes**: 38 testes unitários
-- **Linhas de Código Cobertas**: ~95%
-- **Funções Cobertas**: 100%
-- **Branches Cobertas**: 85%+
-
+✅ Casos de borda: testar entradas inválidas e IDs falsos em sequência
 ## 🧪 Exemplo de Execução
 
 ```
