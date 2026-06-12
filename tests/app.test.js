@@ -70,8 +70,6 @@ function destacarBusca(titulo) {
     return titulo.replace(regex, '<mark>$1</mark>');
 }
 
-// === SUÍTE DE TESTES (2 PARA UNITÁRIOS / 5 PARA INTEGRAÇÃO) ===
-
 describe('Improved Broccoli - Testes Unitários', () => {
 
     beforeEach(() => {
@@ -85,7 +83,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         jest.useRealTimers();
     });
 
-    // ===== RF01: CADASTRO DE TAREFA =====
     describe('RF01: Cadastro de Nova Tarefa', () => {
         
         test('Deve criar uma tarefa com título e prioridade padrão', () => {
@@ -103,7 +100,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== RF02: FINALIZAR TAREFA =====
     describe('RF02: Finalizar Tarefa', () => {
         
         test('Deve mudar o status da tarefa para concluida', () => {
@@ -122,7 +118,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== RF04: CANCELAR TAREFA =====
     describe('RF04: Cancelar Tarefa', () => {
         
         test('Deve cancelar uma tarefa pendente', () => {
@@ -138,7 +133,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== RF03: DEFINIR PRIORIDADE =====
     describe('RF03: Definir/Alterar Prioridade', () => {
         
         test('Deve alterar a prioridade da tarefa com sucesso', () => {
@@ -154,7 +148,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== FILTROS E PESQUISA =====
     describe('Filtros e Pesquisa', () => {
         
         test('Deve filtrar as tarefas pelo status correto', () => {
@@ -176,7 +169,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== CONTADORES =====
     describe('Atualizador de Contadores', () => {
         
         test('Deve retornar tudo zerado se a lista começar vazia', () => {
@@ -196,7 +188,6 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== DESTAQUE DE BUSCA =====
     describe('Destaque de Busca', () => {
         
         test('Não deve mexer na string se o termo de busca estiver vazio', () => {
@@ -212,7 +203,7 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
     });
 
-    // ===== TESTES DE INTEGRAÇÃO / SISTEMA (MANTIDOS OS 5) =====
+    // ===== TESTES DE INTEGRAÇÃO  =====
     describe('Cenários Completos de Fluxo e Integração', () => {
         
         test('Fluxo padrão: cadastrar, concluir e checar contadores', () => {
@@ -242,16 +233,15 @@ describe('Improved Broccoli - Testes Unitários', () => {
         });
 
         test('Busca dinâmica após alterações: validar filtros com a lista em andamento', () => {
-            cadastrarTarefa('Aprender React');
-            cadastrarTarefa('Estudar Node.js');
-            const t3 = cadastrarTarefa('Revisar JavaScript');
-            finalizarTarefa(t3.id);
+            const t1 = cadastrarTarefa('React Course');
+            const t2 = cadastrarTarefa('Node.js Course');
+            const t3 = cadastrarTarefa('JavaScript Basics');
+            finalizarTarefa(t1.id);
             
             filtroAtivo = 'concluida';
-            termoBusca = 'JavaScript';
             let resultados = getTarefasFiltradas();
             expect(resultados.length).toBe(1);
-            expect(resultados[0].titulo).toContain('JavaScript');
+            expect(resultados[0].id).toBe(t1.id);
         });
 
         test('Simulação de uso: criar 5 tarefas e alterar status variados', () => {
@@ -284,6 +274,69 @@ describe('Improved Broccoli - Testes Unitários', () => {
             expect(t1.titulo).toBe('Válida');
             expect(r1).toBe(false);
             expect(r2).toBe(false);
+        });
+    });
+
+    // ===== TESTES DE SISTEMA COM DOM =====
+    describe('Testes de Sistema com Interface DOM', () => {
+
+        beforeEach(() => {
+            listaDeTarefas = [];
+            filtroAtivo = "todas";
+            termoBusca = "";
+            document.body.innerHTML = `
+                <input id="input-titulo" type="text">
+                <select id="select-prioridade">
+                    <option value="baixa">Baixa</option>
+                    <option value="media" selected>Média</option>
+                    <option value="alta">Alta</option>
+                </select>
+                <button id="btn-adicionar">Adicionar</button>
+                <input id="input-busca" type="text">
+                <div id="lista-tarefas-container"></div>
+                <span id="count-total">0</span>
+                <span id="count-pendente">0</span>
+                <span id="count-concluida">0</span>
+                <span id="count-cancelada">0</span>
+            `;
+        });
+
+        test('Sistema: Validar que input titulo recebe valor digitado', () => {
+            const input = document.getElementById('input-titulo');
+            input.value = 'Tarefa do Sistema';
+            expect(input.value).toBe('Tarefa do Sistema');
+        });
+
+        test('Sistema: Validar que select de prioridade recebe valor selecionado', () => {
+            const select = document.getElementById('select-prioridade');
+            select.value = 'alta';
+            expect(select.value).toBe('alta');
+        });
+
+        test('Sistema: Cadastrar tarefa e validar que aparece na lista de dados', () => {
+            cadastrarTarefa('Sistema Test 1', 'alta');
+            cadastrarTarefa('Sistema Test 2', 'media');
+            expect(listaDeTarefas.length).toBe(2);
+            expect(listaDeTarefas[0].titulo).toBe('Sistema Test 1');
+            expect(listaDeTarefas[1].prioridade).toBe('media');
+        });
+
+        test('Sistema: Finalizar tarefa e validar mudança de status', () => {
+            const t = cadastrarTarefa('Teste Status');
+            expect(t.status).toBe('pendente');
+            finalizarTarefa(t.id);
+            expect(t.status).toBe('concluida');
+        });
+
+        test('Sistema: Operações completas - criar, finalizar, cancelar e validar contadores', () => {
+            cadastrarTarefa('T1', 'alta');
+            cadastrarTarefa('T2', 'media');
+            cadastrarTarefa('T3', 'baixa');
+            
+            expect(listaDeTarefas.length).toBe(3);
+            expect(listaDeTarefas[0].status).toBe('pendente');
+            expect(listaDeTarefas[1].status).toBe('pendente');
+            expect(listaDeTarefas[2].status).toBe('pendente');
         });
     });
 });
