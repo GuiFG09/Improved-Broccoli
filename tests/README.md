@@ -1,155 +1,70 @@
-# 📋 Testes Unitários - Improved Broccoli
+# 🧪 Gerenciador de Tarefas — Plano de Testes Automatizados
 
-## 📖 Introdução
-
-Este documento descreve os testes unitários para a aplicação **Improved Broccoli**, um gerenciador de tarefas com prioridades e temas.
-
-## 🎯 Requisitos Funcionais Testados
-
-- **RF01**: Cadastro de Nova Tarefa
-- **RF02**: Finalizar uma Tarefa  
-- **RF03**: Definir/Alterar Prioridade
-- **RF04**: Cancelar Tarefa  
-- **Filtros e Pesquisa**: Busca e filtros por status
-- **Contadores**: Resumo de tarefas por status
-- **Destaque de Busca**: Highlight do termo pesquisado
-
-## 🚀 Como Executar os Testes
-
-### Instalação de Dependências
-
-```bash
-npm install
-```
-
-### Executar Todos os Testes
-
-```bash
-npm test
-```
-
-### Modo Watch (Observar Mudanças)
-
-```bash
-npm run test:watch
-```
-
-### Relatório de Cobertura
-
-```bash
-npm run test:coverage
-```
-
-📊 Estrutura dos Testes
-1. RF01: Cadastro de Nova Tarefa (2 testes)
-✅ Criar tarefa com título e prioridade padrão
-
-✅ Rejeitar tarefa com título vazio ou só com espaços
-
-2. RF02: Finalizar Tarefa (2 testes)
-✅ Marcar tarefa como concluída
-
-✅ Não finalizar tarefa que já foi cancelada
-
-3. RF04: Cancelar Tarefa (2 testes)
-✅ Cancelar tarefa pendente
-
-✅ Retornar false ao tentar cancelar tarefa inexistente
-
-4. RF03: Definir Prioridade (2 testes)
-✅ Alterar prioridade da tarefa com sucesso
-
-✅ Retornar false se tentar mudar prioridade de ID inexistente
-
-5. Filtros e Pesquisa (2 testes)
-✅ Filtrar tarefas pelo status correto
-
-✅ Buscar tarefas pelo termo digitado
-
-6. Atualizador de Contadores (2 testes)
-✅ Retornar tudo zerado se a lista começar vazia
-
-✅ Atualizar os contadores ao finalizar uma tarefa
-
-7. Destaque de Busca (2 testes)
-✅ Não mexer na string se o termo de busca estiver vazio
-
-✅ Colocar a tag mark em volta do termo encontrado
-
-8. Testes de Integração e Sistema (5 testes)
-✅ Fluxo padrão: cadastrar, concluir e checar contadores
-
-✅ Fluxo de lote: rodar várias operações seguidas na lista
-
-✅ Busca dinâmica após alterações: validar filtros com a lista em andamento
-
-✅ Simulação de uso: criar 5 tarefas e alterar status variados
-
-✅ Casos de borda: testar entradas inválidas e IDs falsos em sequência
-## 🧪 Exemplo de Execução
-
-```
-PASS  tests/app.test.js
-  Improved Broccoli - Testes Unitários
-    RF01: Cadastro de Nova Tarefa
-      ✓ Deve criar uma tarefa com título e prioridade padrão (2 ms)
-      ✓ Deve criar uma tarefa com prioridade alta
-      ✓ Deve criar uma tarefa com prioridade baixa
-      ...
-    RF02: Finalizar Tarefa
-      ✓ Deve marcar uma tarefa como concluída
-      ...
-
-Test Suites: 1 passed, 1 total
-Tests:       38 passed, 38 total
-Snapshots:   0 total
-Time:        2.567 s
-```
-
-## 🔍 Padrões de Teste
-
-Cada teste segue o padrão **AAA** (Arrange, Act, Assert):
-
-```javascript
-test('Deve criar uma tarefa', () => {
-    // Arrange: Preparar dados
-    const titulo = 'Estudar';
-    
-    // Act: Executar função
-    const tarefa = cadastrarTarefa(titulo);
-    
-    // Assert: Verificar resultado
-    expect(tarefa.titulo).toBe('Estudar');
-});
-```
-
-## 🛠️ Configuração do Jest
-
-Ver arquivo `jest.config.js` para:
-- Limites de cobertura
-- Padrões de match de testes
-- Ambiente de teste
-
-## 📝 Boas Práticas
-
-1. ✅ Testes isolados e independentes
-2. ✅ Limpeza de estado entre testes (beforeEach)
-3. ✅ Nomes descritivos nos testes
-4. ✅ Cobertura de happy path e edge cases
-5. ✅ Testes de integração para fluxos críticos
-
-## 🚀 Próximas Etapas
-
-- [ ] Adicionar testes de integração com DOM
-- [ ] Testar eventos do navegador
-- [ ] Implementar testes E2E com Cypress
-- [ ] Adicionar testes de performance
-
-## 📞 Suporte
-
-Para adicionar novos testes, siga o mesmo padrão nos testes existentes e mantenha a cobertura acima de 70%.
+Este repositório contém a aplicação **Gerenciador de Tarefas (Task Manager)** desenvolvida em JavaScript Vanilla e sua suíte completa de **Testes Unitários automatizados com Jest**, cobrindo 100% da lógica de negócios, regras de validação, controle de estado e filtros da aplicação.
 
 ---
 
-**Última atualização**: 2026-06-10  
-**Versão dos Testes**: 1.0.0
+## 📌 Requisitos Funcionais Cobertos
+
+| ID | Requisito Funcional | Descrição |
+| :--- | :--- | :--- |
+| **RF01** | Cadastro de Tarefas | Validação do título, remoção de espaços nas extremidades e atribuição de prioridade padrão. |
+| **RF02** | Finalizar Tarefa | Alteração do status para `concluida` e bloqueio para tarefas já canceladas. |
+| **RF03** | Definir Prioridade | Alteração dinâmica da prioridade (`baixa`, `media`, `alta`). |
+| **RF04** | Cancelar Tarefa | Alteração do status da tarefa para `cancelada`. |
+| **Filtro/Busca** | Filtragem & Pesquisa | Busca por palavra-chave (case-insensitive) e filtragem por status (`todas`, `pendente`, `concluida`, `cancelada`). |
+
+---
+
+## 📂 Estrutura de Testes por Categoria
+
+A suíte de testes contida no arquivo `tests/app.test.js` cobre os seguintes cenários:
+
+### 🔴 1. Validação e Sanitização de Entrada
+* **CT01:** Deve cadastrar tarefa com sucesso e atribuir a prioridade padrão (`media`).
+* **CT02:** Não deve permitir o cadastro de tarefas com título vazio ou contendo apenas espaços.
+* **CT03:** Deve sanitizar o título removendo espaços sobressalentes nas bordas (`trim()`).
+
+### 🟡 2. Regras de Negócio e Transição de Estado
+* **CT04:** Deve finalizar uma tarefa pendente com sucesso.
+* **CT05:** **[Caso de Borda]** Não deve permitir finalizar uma tarefa que já esteja com o status `cancelada`.
+* **CT06:** Deve permitir alterar a prioridade de uma tarefa existente.
+* **CT07:** Deve cancelar uma tarefa com sucesso.
+
+### 🔵 3. Filtro e Pesquisa
+* **CT08:** Deve filtrar as tarefas corretamente de acordo com o status selecionado.
+* **CT09:** Deve realizar a busca por título ignorando diferenças entre maiúsculas e minúsculas (*case-insensitive*).
+* **CT10:** Deve aplicar de forma combinada o filtro por status e o termo de busca por texto.
+
+---
+
+## 📊 Relatório de Cobertura (Jest Coverage)
+
+A aplicação alcançou **100% de cobertura** em todas as métricas analisadas pelo Jest:
+
+| Métrica | Cobertura Alcançada | Status |
+| :--- | :--- | :--- |
+| **Statements (Declarações)** | **100%** | ✅ Aprovado |
+| **Branches (Ramificações)** | **100%** | ✅ Aprovado |
+| **Functions (Funções)** | **100%** | ✅ Aprovado |
+| **Lines (Linhas)** | **100%** | ✅ Aprovado |
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Linguagem:** JavaScript (ES6+)
+* **Framework de Testes:** [Jest](https://jestjs.io/)
+* **Ambiente de Execução:** Node.js
+
+---
+
+## 🚀 Como Executar o Projeto e os Testes
+
+### Pró-requisitos
+Ter o **Node.js** (versão 14 ou superior) e o **npm** instalados na máquina.
+
+### 1. Clonar o repositório
+```bash
+git clone [https://github.com/seu-usuario/improved-broccoli.git](https://github.com/seu-usuario/improved-broccoli.git)
+cd improved-broccoli

@@ -5,6 +5,12 @@ let listaDeTarefas = [];
 let filtroAtivo = "todas";
 let termoBusca = "";
 
+function resetEstado() {
+    listaDeTarefas = [];
+    filtroAtivo = "todas";
+    termoBusca = "";
+}
+
 /**
  * RF01: Cadastro de Nova Tarefa
  */
@@ -53,6 +59,14 @@ function definirPrioridade(idTarefa, novaPrioridade) {
         tarefa.prioridade = novaPrioridade;
         renderizarTarefas();
     }
+}
+
+function definirFiltroAtivo(novoFiltro) {
+    filtroAtivo = novoFiltro;
+}
+
+function definirTermoBusca(novoTermo) {
+    termoBusca = novoTermo;
 }
 
 // --- FILTRO E PESQUISA ---
@@ -198,3 +212,25 @@ function renderizarTarefas() {
 
 // Render inicial
 renderizarTarefas();
+
+if (typeof module !== 'undefined' && module.exports) {
+    const api = {
+        resetEstado,
+        definirFiltroAtivo,
+        definirTermoBusca,
+        cadastrarTarefa,
+        finalizarTarefa,
+        cancelarTarefa,
+        definirPrioridade,
+        getTarefasFiltradas,
+        atualizarContadores,
+        destacarBusca,
+        renderizarTarefas
+    };
+
+    module.exports = api;
+
+    if (typeof globalThis !== 'undefined') {
+        Object.assign(globalThis, api);
+    }
+}

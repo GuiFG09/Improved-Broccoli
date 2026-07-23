@@ -1,352 +1,186 @@
+const buildDom = () => {
+    document.body.innerHTML = `
+        <button id="btn-adicionar">+ Adicionar</button>
+        <input id="input-titulo" type="text" />
+        <select id="select-prioridade">
+            <option value="baixa">Baixa</option>
+            <option value="media" selected>Média</option>
+            <option value="alta">Alta</option>
+        </select>
+        <input id="input-busca" type="text" />
+        <button id="btn-limpar-busca">Limpar</button>
+        <button class="btn-filtro ativo" data-filtro="todas">Todas</button>
+        <button class="btn-filtro" data-filtro="pendente">Pendentes</button>
+        <button class="btn-filtro" data-filtro="concluida">Concluídas</button>
+        <button class="btn-filtro" data-filtro="cancelada">Canceladas</button>
+        <span id="count-total"></span>
+        <span id="count-pendente"></span>
+        <span id="count-concluida"></span>
+        <span id="count-cancelada"></span>
+        <div id="lista-titulo-label"></div>
+        <div id="lista-tarefas-container"></div>
+        <div id="estado-vazio" class="hidden">
+            <span class="estado-vazio-icone"></span>
+            <p class="estado-vazio-texto"></p>
+            <p class="estado-vazio-sub"></p>
+        </div>
+    `;
+};
 
-// Mock das variáveis globais
-let listaDeTarefas = [];
-let filtroAtivo = "todas";
-let termoBusca = "";
-
-// FUNÇÕES A TESTAR 
-
-function cadastrarTarefa(titulo, prioridade = "media") {
-    if (!titulo || titulo.trim() === "") return;
-
-    const novaTarefa = {
-        id: Date.now(),
-        titulo: titulo.trim(),
-        prioridade: prioridade,
-        status: "pendente"
-    };
-
-    listaDeTarefas.push(novaTarefa);
-    return novaTarefa;
-}
-
-function finalizarTarefa(idTarefa) {
-    const tarefa = listaDeTarefas.find(t => t.id === idTarefa);
-    if (tarefa && tarefa.status !== "cancelada") {
-        tarefa.status = "concluida";
-        return true;
-    }
-    return false;
-}
-
-function cancelarTarefa(idTarefa) {
-    const tarefa = listaDeTarefas.find(t => t.id === idTarefa);
-    if (tarefa) {
-        tarefa.status = "cancelada";
-        return true;
-    }
-    return false;
-}
-
-function definirPrioridade(idTarefa, novaPrioridade) {
-    const tarefa = listaDeTarefas.find(t => t.id === idTarefa);
-    if (tarefa) {
-        tarefa.prioridade = novaPrioridade;
-        return true;
-    }
-    return false;
-}
-
-function getTarefasFiltradas() {
-    return listaDeTarefas.filter(tarefa => {
-        const passaFiltro = filtroAtivo === "todas" || tarefa.status === filtroAtivo;
-        const passaBusca = tarefa.titulo.toLowerCase().includes(termoBusca.toLowerCase());
-        return passaFiltro && passaBusca;
-    });
-}
-
-function atualizarContadores() {
-    return {
-        total: listaDeTarefas.length,
-        pendente: listaDeTarefas.filter(t => t.status === 'pendente').length,
-        concluida: listaDeTarefas.filter(t => t.status === 'concluida').length,
-        cancelada: listaDeTarefas.filter(t => t.status === 'cancelada').length
-    };
-}
-
-function destacarBusca(titulo) {
-    if (!termoBusca) return titulo;
-    const regex = new RegExp(`(${termoBusca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return titulo.replace(regex, '<mark>$1</mark>');
-}
-
-describe('Improved Broccoli - Testes Unitários', () => {
+describe('Plano de Testes - Gerenciador de Tarefas', () => {
+    let app;
 
     beforeEach(() => {
-        listaDeTarefas = [];
-        filtroAtivo = "todas";
-        termoBusca = "";
-        jest.useRealTimers();
+        buildDom();
+        jest.resetModules();
+        app = require('../app.js');
+        app.resetEstado();
+        app.renderizarTarefas();
     });
 
-    afterEach(() => {
-        jest.useRealTimers();
+    test('CT01: Deve cadastrar tarefa com sucesso e prioridade padrão (média)', () => {
+        app.cadastrarTarefa('Comprar leite');
+        expect(app.getTarefasFiltradas()).toHaveLength(1);
+        expect(app.getTarefasFiltradas()[0].titulo).toBe('Comprar leite');
+        expect(app.getTarefasFiltradas()[0].prioridade).toBe('media');
+        expect(app.getTarefasFiltradas()[0].status).toBe('pendente');
     });
 
-    describe('RF01: Cadastro de Nova Tarefa', () => {
-        
-        test('Deve criar uma tarefa com título e prioridade padrão', () => {
-            const tarefa = cadastrarTarefa('Estudar Jest');
-            expect(tarefa).toBeDefined();
-            expect(tarefa.titulo).toBe('Estudar Jest');
-            expect(tarefa.prioridade).toBe('media');
-            expect(tarefa.status).toBe('pendente');
-        });
-
-        test('Não deve cadastrar tarefa se o título for vazio ou só espaços', () => {
-            cadastrarTarefa('');
-            cadastrarTarefa('   ');
-            expect(listaDeTarefas.length).toBe(0);
-        });
+    test('CT02: Não deve cadastrar tarefa com título vazio ou apenas espaços', () => {
+        app.cadastrarTarefa('');
+        app.cadastrarTarefa('   ');
+        expect(app.getTarefasFiltradas()).toHaveLength(0);
     });
 
-    describe('RF02: Finalizar Tarefa', () => {
-        
-        test('Deve mudar o status da tarefa para concluida', () => {
-            const tarefa = cadastrarTarefa('Estudar');
-            const resultado = finalizarTarefa(tarefa.id);
-            expect(resultado).toBe(true);
-            expect(tarefa.status).toBe('concluida');
-        });
-
-        test('Não deve finalizar uma tarefa que foi cancelada', () => {
-            const tarefa = cadastrarTarefa('Tarefa');
-            cancelarTarefa(tarefa.id);
-            const resultado = finalizarTarefa(tarefa.id);
-            expect(resultado).toBe(false);
-            expect(tarefa.status).toBe('cancelada');
-        });
+    test('CT03: Deve remover espaços sobressalentes nas bordas do título', () => {
+        app.cadastrarTarefa('   Estudar para a prova   ', 'alta');
+        expect(app.getTarefasFiltradas()[0].titulo).toBe('Estudar para a prova');
     });
 
-    describe('RF04: Cancelar Tarefa', () => {
-        
-        test('Deve cancelar uma tarefa pendente', () => {
-            const tarefa = cadastrarTarefa('Tarefa');
-            const resultado = cancelarTarefa(tarefa.id);
-            expect(resultado).toBe(true);
-            expect(tarefa.status).toBe('cancelada');
-        });
-
-        test('Deve retornar false ao tentar cancelar tarefa inexistente', () => {
-            const resultado = cancelarTarefa(99999);
-            expect(resultado).toBe(false);
-        });
+    test('CT04: Deve finalizar tarefa pendente com sucesso', () => {
+        app.cadastrarTarefa('Tarefa 1');
+        const id = app.getTarefasFiltradas()[0].id;
+        app.finalizarTarefa(id);
+        expect(app.getTarefasFiltradas()[0].status).toBe('concluida');
     });
 
-    describe('RF03: Definir/Alterar Prioridade', () => {
-        
-        test('Deve alterar a prioridade da tarefa com sucesso', () => {
-            const tarefa = cadastrarTarefa('Tarefa', 'baixa');
-            const resultado = definirPrioridade(tarefa.id, 'alta');
-            expect(resultado).toBe(true);
-            expect(tarefa.prioridade).toBe('alta');
-        });
-
-        test('Deve retornar false se tentar mudar prioridade de ID inexistente', () => {
-            const resultado = definirPrioridade(99999, 'alta');
-            expect(resultado).toBe(false);
-        });
+    test('CT05: Não deve permitir finalizar uma tarefa cancelada', () => {
+        app.cadastrarTarefa('Tarefa 2');
+        const id = app.getTarefasFiltradas()[0].id;
+        app.cancelarTarefa(id);
+        app.finalizarTarefa(id);
+        expect(app.getTarefasFiltradas()[0].status).toBe('cancelada');
     });
 
-    describe('Filtros e Pesquisa', () => {
-        
-        test('Deve filtrar as tarefas pelo status correto', () => {
-            const t1 = cadastrarTarefa('Tarefa 1');
-            cadastrarTarefa('Tarefa 2');
-            finalizarTarefa(t1.id);
-            
-            filtroAtivo = 'concluida';
-            expect(getTarefasFiltradas().length).toBe(1);
-        });
-
-        test('Deve buscar tarefas pelo termo digitado', () => {
-            cadastrarTarefa('Estudar JavaScript');
-            cadastrarTarefa('Fazer exercício');
-            termoBusca = 'JavaScript';
-            const filtradas = getTarefasFiltradas();
-            expect(filtradas.length).toBe(1);
-            expect(filtradas[0].titulo).toContain('JavaScript');
-        });
+    test('CT06: Deve alterar a prioridade de uma tarefa existente', () => {
+        app.cadastrarTarefa('Ler livro');
+        const id = app.getTarefasFiltradas()[0].id;
+        app.definirPrioridade(id, 'alta');
+        expect(app.getTarefasFiltradas()[0].prioridade).toBe('alta');
     });
 
-    describe('Atualizador de Contadores', () => {
-        
-        test('Deve retornar tudo zerado se a lista começar vazia', () => {
-            const contadores = atualizarContadores();
-            expect(contadores.total).toBe(0);
-            expect(contadores.pendente).toBe(0);
-            expect(contadores.concluida).toBe(0);
-            expect(contadores.cancelada).toBe(0);
-        });
-
-        test('Deve atualizar os contadores ao finalizar uma tarefa', () => {
-            const t1 = cadastrarTarefa('Tarefa 1');
-            finalizarTarefa(t1.id);
-            const contadores = atualizarContadores();
-            expect(contadores.concluida).toBe(1);
-            expect(contadores.pendente).toBe(0);
-        });
+    test('CT07: Deve cancelar uma tarefa com sucesso', () => {
+        app.cadastrarTarefa('Pagar conta');
+        const id = app.getTarefasFiltradas()[0].id;
+        app.cancelarTarefa(id);
+        expect(app.getTarefasFiltradas()[0].status).toBe('cancelada');
     });
 
-    describe('Destaque de Busca', () => {
-        
-        test('Não deve mexer na string se o termo de busca estiver vazio', () => {
-            termoBusca = '';
-            const resultado = destacarBusca('JavaScript');
-            expect(resultado).toBe('JavaScript');
-        });
+    test('CT08: Deve filtrar tarefas por status', () => {
+        app.cadastrarTarefa('T1');
+        app.cadastrarTarefa('T2');
+        const primeiraTarefa = app.getTarefasFiltradas()[0];
+        app.finalizarTarefa(primeiraTarefa.id);
 
-        test('Deve colocar a tag mark em volta do termo encontrado', () => {
-            termoBusca = 'Java';
-            const resultado = destacarBusca('JavaScript');
-            expect(resultado).toBe('<mark>Java</mark>Script');
-        });
+        app.definirFiltroAtivo('concluida');
+        expect(app.getTarefasFiltradas()).toHaveLength(1);
+        expect(app.getTarefasFiltradas()[0].titulo).toBe('T1');
     });
 
-    // ===== TESTES DE INTEGRAÇÃO  =====
-    describe('Cenários Completos de Fluxo e Integração', () => {
-        
-        test('Fluxo padrão: cadastrar, concluir e checar contadores', () => {
-            const t1 = cadastrarTarefa('Tarefa 1', 'alta');
-            expect(atualizarContadores().pendente).toBe(1);
-            
-            finalizarTarefa(t1.id);
-            const contadores = atualizarContadores();
-            expect(contadores.concluida).toBe(1);
-            expect(contadores.pendente).toBe(0);
-        });
+    test('CT09: Deve buscar tarefas por palavra-chave (case-insensitive)', () => {
+        app.cadastrarTarefa('Estudar Javascript');
+        app.cadastrarTarefa('Fazer compras');
 
-        test('Fluxo de lote: rodar várias operações seguidas na lista', () => {
-            jest.useFakeTimers();
-            const t1 = cadastrarTarefa('Task 1'); jest.advanceTimersByTime(5);
-            const t2 = cadastrarTarefa('Task 2'); jest.advanceTimersByTime(5);
-            const t3 = cadastrarTarefa('Task 3');
-            
-            finalizarTarefa(t1.id);
-            definirPrioridade(t2.id, 'alta');
-            cancelarTarefa(t3.id);
-            
-            const contadores = atualizarContadores();
-            expect(contadores.concluida).toBe(1);
-            expect(contadores.cancelada).toBe(1);
-            expect(t2.prioridade).toBe('alta');
-        });
-
-        test('Busca dinâmica após alterações: validar filtros com a lista em andamento', () => {
-            const t1 = cadastrarTarefa('React Course');
-            const t2 = cadastrarTarefa('Node.js Course');
-            const t3 = cadastrarTarefa('JavaScript Basics');
-            finalizarTarefa(t1.id);
-            
-            filtroAtivo = 'concluida';
-            let resultados = getTarefasFiltradas();
-            expect(resultados.length).toBe(1);
-            expect(resultados[0].id).toBe(t1.id);
-        });
-
-        test('Simulação de uso: criar 5 tarefas e alterar status variados', () => {
-            jest.useFakeTimers();
-            const tarefas = [];
-            for (let i = 1; i <= 5; i++) {
-                tarefas.push(cadastrarTarefa(`Tarefa ${i}`));
-                jest.advanceTimersByTime(5);
-            }
-            finalizarTarefa(tarefas[0].id);
-            finalizarTarefa(tarefas[1].id);
-            cancelarTarefa(tarefas[2].id);
-            
-            const contadores = atualizarContadores();
-            expect(contadores.total).toBe(5);
-            expect(contadores.concluida).toBe(2);
-            expect(contadores.cancelada).toBe(1);
-            expect(contadores.pendente).toBe(2);
-        });
-
-        test('Casos de borda: testar entradas inválidas e IDs falsos em sequência', () => {
-            cadastrarTarefa('');
-            cadastrarTarefa('   ');
-            const t1 = cadastrarTarefa('  Válida  ');
-            
-            const r1 = finalizarTarefa(99999);
-            const r2 = definirPrioridade(99999, 'alta');
-            
-            expect(listaDeTarefas.length).toBe(1);
-            expect(t1.titulo).toBe('Válida');
-            expect(r1).toBe(false);
-            expect(r2).toBe(false);
-        });
+        app.definirTermoBusca('JAVASCRIPT');
+        expect(app.getTarefasFiltradas()).toHaveLength(1);
+        expect(app.getTarefasFiltradas()[0].titulo).toBe('Estudar Javascript');
     });
 
-    // ===== TESTES DE SISTEMA COM DOM =====
-    describe('Testes de Sistema com Interface DOM', () => {
+    test('CT10: Deve combinar filtro de status e busca textual', () => {
+        app.cadastrarTarefa('Limpar quarto');
+        app.cadastrarTarefa('Limpar cozinha');
+        app.finalizarTarefa(app.getTarefasFiltradas()[0].id);
 
-        beforeEach(() => {
-            listaDeTarefas = [];
-            filtroAtivo = "todas";
-            termoBusca = "";
-            document.body.innerHTML = `
-                <input id="input-titulo" type="text">
-                <select id="select-prioridade">
-                    <option value="baixa">Baixa</option>
-                    <option value="media" selected>Média</option>
-                    <option value="alta">Alta</option>
-                </select>
-                <button id="btn-adicionar">Adicionar</button>
-                <input id="input-busca" type="text">
-                <div id="lista-tarefas-container"></div>
-                <span id="count-total">0</span>
-                <span id="count-pendente">0</span>
-                <span id="count-concluida">0</span>
-                <span id="count-cancelada">0</span>
-            `;
-        });
+        app.definirFiltroAtivo('concluida');
+        app.definirTermoBusca('Limpar');
+        const resultado = app.getTarefasFiltradas();
 
-        test('Sistema: Validar que input titulo recebe valor digitado', () => {
-            const input = document.getElementById('input-titulo');
-            input.value = 'Tarefa do Sistema';
-            expect(input.value).toBe('Tarefa do Sistema');
-        });
+        expect(resultado).toHaveLength(1);
+        expect(resultado[0].titulo).toBe('Limpar quarto');
+    });
 
-        test('Sistema: Validar que select de prioridade recebe valor selecionado', () => {
-            const select = document.getElementById('select-prioridade');
-            select.value = 'alta';
-            expect(select.value).toBe('alta');
-        });
+    test('CT11: Deve cadastrar tarefa pela interface ao clicar em Adicionar', () => {
+        const inputTitulo = document.getElementById('input-titulo');
+        const selectPrioridade = document.getElementById('select-prioridade');
 
-        test('Sistema: Cadastrar tarefa e validar que aparece na lista de dados', () => {
-            cadastrarTarefa('Sistema Test 1', 'alta');
-            cadastrarTarefa('Sistema Test 2', 'media');
-            expect(listaDeTarefas.length).toBe(2);
-            expect(listaDeTarefas[0].titulo).toBe('Sistema Test 1');
-            expect(listaDeTarefas[1].prioridade).toBe('media');
-        });
+        inputTitulo.value = 'Estudar banco de dados';
+        selectPrioridade.value = 'alta';
+        document.getElementById('btn-adicionar').click();
 
-        test('Sistema: Finalizar tarefa e validar mudança de status', () => {
-            const t = cadastrarTarefa('Teste Status');
-            expect(t.status).toBe('pendente');
-            finalizarTarefa(t.id);
-            expect(t.status).toBe('concluida');
-        });
+        expect(document.querySelectorAll('.tarefa-card')).toHaveLength(1);
+        expect(document.querySelector('.tarefa-titulo').textContent).toBe('Estudar banco de dados');
+        expect(document.getElementById('count-total').textContent).toBe('1');
+        expect(document.getElementById('count-pendente').textContent).toBe('1');
+        expect(inputTitulo.value).toBe('');
+        expect(selectPrioridade.value).toBe('media');
+    });
 
-        test('Sistema: Operações completas - criar, finalizar, cancelar e validar contadores', () => {
-            cadastrarTarefa('T1', 'alta');
-            cadastrarTarefa('T2', 'media');
-            cadastrarTarefa('T3', 'baixa');
-            
-            expect(listaDeTarefas.length).toBe(3);
-            expect(listaDeTarefas[0].status).toBe('pendente');
-            expect(listaDeTarefas[1].status).toBe('pendente');
-            expect(listaDeTarefas[2].status).toBe('pendente');
-        });
+    test('CT12: Deve concluir uma tarefa pela interface', () => {
+        document.getElementById('input-titulo').value = 'Escrever relatório';
+        document.getElementById('btn-adicionar').click();
+
+        document.querySelector('.btn-concluir').click();
+
+        expect(document.querySelector('.status-badge').textContent).toBe('✔ Concluída');
+        expect(document.getElementById('count-concluida').textContent).toBe('1');
+        expect(document.getElementById('count-pendente').textContent).toBe('0');
+    });
+
+    test('CT13: Deve cancelar uma tarefa pela interface', () => {
+        document.getElementById('input-titulo').value = 'Comprar café';
+        document.getElementById('btn-adicionar').click();
+
+        document.querySelector('.btn-cancelar').click();
+
+        expect(document.querySelector('.status-badge').textContent).toBe('✖ Cancelada');
+        expect(document.getElementById('count-cancelada').textContent).toBe('1');
+        expect(document.getElementById('count-pendente').textContent).toBe('0');
+    });
+
+    test('CT14: Deve filtrar, buscar e limpar a pesquisa pela interface', () => {
+        document.getElementById('input-titulo').value = 'Limpar quarto';
+        document.getElementById('btn-adicionar').click();
+        document.getElementById('input-titulo').value = 'Limpar cozinha';
+        document.getElementById('btn-adicionar').click();
+
+        document.querySelector('.btn-filtro[data-filtro="pendente"]').click();
+        expect(document.getElementById('lista-titulo-label').textContent).toBe('Pendentes');
+        expect(document.querySelectorAll('.tarefa-card')).toHaveLength(2);
+
+        const inputBusca = document.getElementById('input-busca');
+        const btnLimparBusca = document.getElementById('btn-limpar-busca');
+
+        inputBusca.value = 'cozinha';
+        inputBusca.dispatchEvent(new Event('input', { bubbles: true }));
+
+        expect(document.querySelectorAll('.tarefa-card')).toHaveLength(1);
+        expect(document.querySelector('.tarefa-titulo').innerHTML).toContain('<mark>cozinha</mark>');
+        expect(btnLimparBusca.classList.contains('visivel')).toBe(true);
+
+        btnLimparBusca.click();
+
+        expect(inputBusca.value).toBe('');
+        expect(btnLimparBusca.classList.contains('visivel')).toBe(false);
+        expect(document.querySelectorAll('.tarefa-card')).toHaveLength(2);
     });
 });
-
-module.exports = {
-    cadastrarTarefa,
-    finalizarTarefa,
-    cancelarTarefa,
-    definirPrioridade,
-    getTarefasFiltradas,
-    atualizarContadores,
-    destacarBusca
-};
