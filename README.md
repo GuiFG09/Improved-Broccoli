@@ -47,7 +47,33 @@ npm run test:watch   # Modo observação
 npm run test:coverage # Ver cobertura
 ```
 
-**24 testes implementados** (13 unitários + 5 integração + 5 sistema)
+**14 testes implementados** (10 unitários/integracao de regra de negocio + 4 testes de sistema)
+
+### Roteiro Básico Para Rodar Os Testes
+
+1. Abra um terminal na raiz do projeto.
+2. Instale as dependências, se ainda não tiver feito isso:
+```bash
+npm install
+```
+3. Execute a suíte completa:
+```bash
+npm test
+```
+4. Gere o relatório de cobertura:
+```bash
+npm run test:coverage
+```
+5. Abra o relatório HTML gerado em:
+`coverage/lcov-report/index.html`
+
+### O Que A Suíte Valida
+
+- Cadastro de tarefas via funções exportadas e via interface.
+- Finalização e cancelamento de tarefas.
+- Alteração de prioridade.
+- Filtros por status e busca textual.
+- Comportamentos visíveis no DOM, como contadores, cards e estado vazio.
 
 ## Estrutura do Projeto
 
@@ -74,7 +100,8 @@ npm run test:coverage # Ver cobertura
 ## Status
 
 ✅ Todos os requisitos implementados  
-✅ 100% de testes passando  
+✅ 14/14 testes passando  
+✅ Cobertura real acima de 95%  
 ✅ Pronto para uso
 
 ## Documentação Adicional
